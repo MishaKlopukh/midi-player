@@ -5,6 +5,16 @@ import os
 import base64
 from .stylers import basic, general, cifka_advanced, default_soundfont
 from functools import partial
+try:
+    from mido import MidiFile
+except ModuleNotFoundError:
+    MidiFile = type(None)
+    import io
+try:
+    from pretty_midi import PrettyMIDI
+    import tempfile
+except ModuleNotFoundError:
+    PrettyMIDI = type(None)
 
 class MIDIPlayer:
     """
@@ -43,7 +53,17 @@ class MIDIPlayer:
 
     def to_player_html(self, url_or_file, styler=None):
         styler = styler or self.styler or basic
-        if os.path.isfile(url_or_file): # if url_or_file points to local file, convert file to data url
+        if isinstance(url_or_file, PrettyMIDI):
+            with tempfile.NamedTemporaryFile('rb') as tf:
+                url_or_file.write(tf.name)
+                encoded_string = base64.b64encode(f.read())
+            self.url ='data:audio/midi;base64,'+encoded_string.decode('utf-8')
+        elif isinstance(url_or_file, MidiFile):
+            with io.BytesIO() as f:
+                url_or_file.save(file=f)
+                encoded_string = base64.b64encode(f.getvalue())
+            self.url ='data:audio/midi;base64,'+encoded_string.decode('utf-8')
+        elif os.path.isfile(url_or_file): # if url_or_file points to local file, convert file to data url
             self.url = self.to_data_url(url_or_file)
         else: 
             self.url = url_or_file
