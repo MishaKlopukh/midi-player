@@ -67,7 +67,7 @@ class MIDIPlayer:
             self.url = self.to_data_url(url_or_file)
         else: 
             self.url = url_or_file
-        return styler(self.url, viz_type=self.viz_type, dl=self.dl, title=self.title, soundfont=self.soundfont)
+        return styler(self.url, viz_type=self.viz_type, dl=self.dl, title=self.title, sound_font=self.soundfont)
 
     def to_data_url(self, midi_filename):  # this is crucial for Colab/WandB support
         with open(midi_filename, "rb") as f:
