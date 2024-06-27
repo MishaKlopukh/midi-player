@@ -5,12 +5,17 @@ src_header = '''<script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,n
 
 dl_str = lambda url, dl: f'<a href="{url}" target="_blank">Download MIDI</a><br>' if dl else ''
 
+default_soundfont = 'https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus'
 
-
-def basic(url, viz_type="piano-roll", dl=False, title=''):
-    return f'''{src_header}  {title} {dl_str(url, dl)}
-            <midi-player src="{url}" sound-font visualizer="#myVisualizer"></midi-player>
+# Left here for backward-compatibility
+def basic(url, viz_type="piano-roll", dl=False, title='', sound_font=default_soundfont):
+    if viz_type in ["piano-roll", "staff", "waterfall"]:
+        return f'''{src_header}  {title} {dl_str(url, dl)}
+            <midi-player src="{url}" sound-font="{sound_font}" visualizer="#myVisualizer"></midi-player>
             <midi-visualizer type="{viz_type}" id="myVisualizer" style="background: #fff;"></midi-visualizer>'''
+    else:
+        return f'''{src_header}  {title} {dl_str(url, dl)}
+            <midi-player src="{url}" sound-font="{sound_font}"></midi-player>'''
 
 
 # source: Ondřej Cífka's "HTML MIDI Player Advanced Examples": https://codepen.io/cifkao/pen/GRZxqZN.  
@@ -82,19 +87,28 @@ p { margin:0 }
 </style>
 '''
 
-def general(url, viz_type="piano-roll", dl=True, css='', title=''):
+def general(url, viz_type="piano-roll", dl=True, css='', title='', sound_font=default_soundfont):
     secnum = random.randint(0,1000)  # randomize section number to avoid conflicts
     css = css.replace('#section3', f'#section{secnum}')
-    header = '' if (title=='' or title=='&nbsp;') and dl==False else f'<p style="text-align:left;font-family:Arial;">{title}<span style="float:right;">{dl_str(url,dl)}</span></p>'
-    return f'''{src_header}\n{css}
-          <section id="section{secnum}">{header}
-          <midi-player src={url} sound-font visualizer="#section{secnum} midi-visualizer"></midi-player>
-          <midi-visualizer src={url} type={viz_type}></midi-visualizer>
-          </section>
-          '''
+    header = '' if (title=='' or title=='&nbsp;') and dl==False else f'''
+        <p style="text-align:left;font-family:Arial;">{title}<span style="float:right;">{dl_str(url,dl)}</span></p>
+    '''
+    if viz_type in ["piano-roll", "staff", "waterfall"]:
+        return f'''{src_header}\n{css}
+            <section id="section{secnum}">{header}
+            <midi-player src="{url}" sound-font="{sound_font}" visualizer="#section{secnum} midi-visualizer"></midi-player>
+            <midi-visualizer src="{url}" type="{viz_type}"></midi-visualizer>
+            </section>
+        '''
+    else:
+        return f'''{src_header}\n{css}
+            <section id="section{secnum}">{header}
+            <midi-player src="{url}" sound-font="{sound_font}"></midi-player>
+            </section>
+        '''
 
-def cifka_advanced(url, viz_type="piano-roll", dl=True, css=cifka_css, title=''):
-    return general(url, viz_type=viz_type, dl=dl, css=css, title=title)
+def cifka_advanced(url, viz_type="piano-roll", dl=True, css=cifka_css, title='', sound_font=default_soundfont):
+    return general(url, viz_type=viz_type, dl=dl, css=css, title=title, sound_font=sound_font)
 
 
 # hawley modified based on cifka's, suggestions by ChatGPT since I don't know color theory
@@ -172,6 +186,6 @@ p {
 </style>
 '''
 
-def dark(url, viz_type="piano-roll", dl=True, css=dark_css, title=''):
-    return general(url, viz_type=viz_type, dl=dl, css=css, title=title)
+def dark(url, viz_type="piano-roll", dl=True, css=dark_css, title='', sound_font=default_soundfont):
+    return general(url, viz_type=viz_type, dl=dl, css=css, title=title, sound_font=sound_font)
 
