@@ -54,8 +54,8 @@ class MIDIPlayer:
     def to_player_html(self, url_or_file, styler=None):
         styler = styler or self.styler or basic
         if isinstance(url_or_file, PrettyMIDI):
-            with tempfile.NamedTemporaryFile('rb') as tf:
-                url_or_file.write(tf.name)
+            with tempfile.NamedTemporaryFile('rb') as f:
+                url_or_file.write(f.name)
                 encoded_string = base64.b64encode(f.read())
             self.url ='data:audio/midi;base64,'+encoded_string.decode('utf-8')
         elif isinstance(url_or_file, MidiFile):
